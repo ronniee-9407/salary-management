@@ -18,16 +18,7 @@ export const KpiCards: React.FC = () => {
     );
   }
 
-  const formatCompactUsd = (num: number): string => {
-    const abs = Math.abs(num);
-    if (abs >= 1_000_000_000) {
-      return `$${(num / 1_000_000_000).toFixed(2)} Billion`;
-    }
-    if (abs >= 1_000_000) {
-      return `$${(num / 1_000_000).toFixed(2)} Million`;
-    }
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
-  };
+
 
   const kpis = [
     {
@@ -40,15 +31,15 @@ export const KpiCards: React.FC = () => {
     },
     {
       title: 'Total Payroll Cost',
-      value: formatCompactUsd(summary.total_payroll_usd),
-      subtitle: `+${formatCompactUsd(summary.total_bonus_usd)} in bonuses`,
+      value: summary.formatted_total_payroll_usd,
+      subtitle: `+${summary.formatted_total_bonus_usd} in bonuses`,
       icon: DollarSign,
       color: 'from-emerald-500 to-teal-400',
       shadow: 'shadow-emerald-500/10',
     },
     {
       title: 'Average Base Salary',
-      value: formatCompactUsd(summary.average_salary_usd),
+      value: summary.formatted_average_salary_usd,
       subtitle: 'Per Employee / Year',
       icon: TrendingUp,
       color: 'from-violet-500 to-purple-400',
@@ -56,13 +47,14 @@ export const KpiCards: React.FC = () => {
     },
     {
       title: 'Median Base Salary',
-      value: formatCompactUsd(summary.median_salary_usd),
+      value: summary.formatted_median_salary_usd,
       subtitle: 'Org Midpoint Baseline',
       icon: Award,
       color: 'from-amber-500 to-orange-400',
       shadow: 'shadow-amber-500/10',
     },
   ];
+
 
 
   return (
