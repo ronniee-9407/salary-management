@@ -27,7 +27,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         # Log Endpoint Entry matching exact user log format
         logger.info(
             f"endpoint.{endpoint_name} entered ip={client_ip} body={body_dict} params={params_str}",
-            extra={"event": "app.subprocess.log"}
+            extra={"event": "app.api.request"}
         )
 
         response = await call_next(request)
@@ -37,7 +37,8 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         # Log Endpoint Completion
         logger.info(
             f"endpoint.{endpoint_name} completed status={response.status_code} duration={duration_ms}ms",
-            extra={"event": "app.subprocess.log"}
+            extra={"event": "app.api.request"}
         )
+
 
         return response
