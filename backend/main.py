@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.core.middleware import RequestLoggingMiddleware
 from app.api.v1.api import api_router
 from app.db.database import engine, Base
 
@@ -13,6 +14,9 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
+# Custom structured logging middleware
+app.add_middleware(RequestLoggingMiddleware)
+
 # CORS configuration for React frontend development
 app.add_middleware(
     CORSMiddleware,
@@ -21,6 +25,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
