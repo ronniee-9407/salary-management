@@ -67,13 +67,17 @@ class PaginatedEmployeeResponse(BaseModel):
     total_pages: int
     items: List[EmployeeOut]
 
-# Analytics Schemas
 class AnalyticsSummary(BaseModel):
     total_employees: int
     total_payroll_usd: float
+    formatted_total_payroll_usd: str
     average_salary_usd: float
+    formatted_average_salary_usd: str
     median_salary_usd: float
+    formatted_median_salary_usd: str
     total_bonus_usd: float
+    formatted_total_bonus_usd: str
+
 
 class DepartmentAnalytics(BaseModel):
     department_id: int

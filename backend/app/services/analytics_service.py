@@ -5,15 +5,27 @@ from app.schemas.schemas import AnalyticsSummary, DepartmentAnalytics, CountryAn
 from typing import List
 import numpy as np
 
+def format_compact_currency(val: float) -> str:
+    abs_val = abs(val)
+    if abs_val >= 1_000_000_000:
+        return f"${(val / 1_000_000_000):.2f} Billion"
+    if abs_val >= 1_000_000:
+        return f"${(val / 1_000_000):.2f} Million"
+    return f"${val:,.0f}"
+
 def get_analytics_summary(db: Session) -> AnalyticsSummary:
     employees = db.query(Employee).join(Country).all()
     if not employees:
         return AnalyticsSummary(
             total_employees=0,
             total_payroll_usd=0.0,
+            formatted_total_payroll_usd="$0",
             average_salary_usd=0.0,
+            formatted_average_salary_usd="$0",
             median_salary_usd=0.0,
-            total_bonus_usd=0.0
+            formatted_median_salary_usd="$0",
+            total_bonus_usd=0.0,
+            formatted_total_bonus_usd="$0"
         )
     
     salaries_usd = [emp.base_salary * emp.country.exchange_rate_to_usd for emp in employees]
@@ -28,10 +40,15 @@ def get_analytics_summary(db: Session) -> AnalyticsSummary:
     return AnalyticsSummary(
         total_employees=total_emp,
         total_payroll_usd=round(total_payroll, 2),
+        formatted_total_payroll_usd=format_compact_currency(total_payroll),
         average_salary_usd=round(avg_salary, 2),
+        formatted_average_salary_usd=format_compact_currency(avg_salary),
         median_salary_usd=round(median_salary, 2),
-        total_bonus_usd=round(total_bonus, 2)
+        formatted_median_salary_usd=format_compact_currency(median_salary),
+        total_bonus_usd=round(total_bonus, 2),
+        formatted_total_bonus_usd=format_compact_currency(total_bonus)
     )
+
 
 def get_department_analytics(db: Session) -> List[DepartmentAnalytics]:
     departments = db.query(Department).all()

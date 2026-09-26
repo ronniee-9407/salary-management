@@ -43,10 +43,15 @@ export interface PaginatedResponse<T> {
 export interface AnalyticsSummary {
   total_employees: number;
   total_payroll_usd: number;
+  formatted_total_payroll_usd: string;
   average_salary_usd: number;
+  formatted_average_salary_usd: string;
   median_salary_usd: number;
+  formatted_median_salary_usd: string;
   total_bonus_usd: number;
+  formatted_total_bonus_usd: string;
 }
+
 
 export interface DepartmentAnalytics {
   department_id: number;
