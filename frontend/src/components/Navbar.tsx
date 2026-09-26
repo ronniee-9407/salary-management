@@ -41,7 +41,7 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center rounded-lg glass-card p-1">
             <button
               onClick={() => dispatch(setDisplayCurrency('USD'))}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md cursor-pointer transition-all ${
                 displayCurrency === 'USD'
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'theme-subtext hover:theme-heading'
@@ -51,7 +51,7 @@ export const Navbar: React.FC = () => {
             </button>
             <button
               onClick={() => dispatch(setDisplayCurrency('LOCAL'))}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md cursor-pointer transition-all ${
                 displayCurrency === 'LOCAL'
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'theme-subtext hover:theme-heading'
@@ -64,7 +64,7 @@ export const Navbar: React.FC = () => {
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            className="flex h-9 w-9 items-center justify-center rounded-lg glass-card hover:scale-105 active:scale-95 transition-all shadow-sm"
+            className="flex h-9 w-9 items-center justify-center rounded-lg glass-card hover:scale-105 active:scale-95 cursor-pointer transition-all shadow-sm"
             title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
             aria-label="Toggle Theme"
           >
@@ -79,7 +79,7 @@ export const Navbar: React.FC = () => {
           <button
             onClick={handleRefresh}
             disabled={loading}
-            className="flex items-center gap-1.5 rounded-lg glass-card px-3 py-1.5 text-xs theme-subtext hover:theme-heading transition-all"
+            className="flex items-center gap-1.5 rounded-lg glass-card px-3 py-1.5 text-xs theme-subtext hover:theme-heading cursor-pointer disabled:cursor-not-allowed transition-all"
             title="Refresh analytics & data"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-sky-400' : ''}`} />

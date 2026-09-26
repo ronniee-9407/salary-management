@@ -93,7 +93,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({ isOpen, onClose, e
               {employeeToEdit ? `Edit Employee #${employeeToEdit.id}` : 'Add New Employee'}
             </h2>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1 theme-subtext hover:theme-heading hover:bg-slate-700/20">
+          <button onClick={onClose} className="rounded-lg p-1 theme-subtext hover:theme-heading hover:bg-slate-700/20 cursor-pointer">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -144,7 +144,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({ isOpen, onClose, e
               <select
                 value={formData.gender}
                 onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
-                className="w-full rounded-xl border p-2.5 theme-input focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border p-2.5 theme-input cursor-pointer focus:border-sky-500 focus:outline-none"
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -169,7 +169,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({ isOpen, onClose, e
               <select
                 value={formData.department_id}
                 onChange={(e) => setFormData({ ...formData, department_id: Number(e.target.value) })}
-                className="w-full rounded-xl border p-2.5 theme-input focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border p-2.5 theme-input cursor-pointer focus:border-sky-500 focus:outline-none"
               >
                 {departments.map((d) => (
                   <option key={d.id} value={d.id}>{d.name}</option>
@@ -181,7 +181,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({ isOpen, onClose, e
               <select
                 value={formData.country_id}
                 onChange={(e) => setFormData({ ...formData, country_id: Number(e.target.value) })}
-                className="w-full rounded-xl border p-2.5 theme-input focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border p-2.5 theme-input cursor-pointer focus:border-sky-500 focus:outline-none"
               >
                 {countries.map((c) => (
                   <option key={c.id} value={c.id}>{c.name} ({c.currency_code})</option>
@@ -219,14 +219,14 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({ isOpen, onClose, e
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl glass-card px-4 py-2 font-semibold theme-subtext hover:theme-heading"
+              className="rounded-xl glass-card px-4 py-2 font-semibold theme-subtext hover:theme-heading cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-2 font-semibold text-white shadow-lg shadow-sky-500/20 hover:from-blue-500 hover:to-sky-400 disabled:opacity-50 transition"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-2 font-semibold text-white shadow-lg shadow-sky-500/20 hover:from-blue-500 hover:to-sky-400 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed transition"
             >
               <Save className="h-4 w-4" /> {saving ? 'Saving...' : 'Save Employee'}
             </button>

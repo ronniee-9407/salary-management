@@ -93,7 +93,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
           <select
             value={filters.departmentId || ''}
             onChange={(e) => dispatch(setFilter({ departmentId: e.target.value ? Number(e.target.value) : null, page: 1 }))}
-            className="rounded-xl border py-2 px-3 text-xs theme-input focus:border-sky-500 focus:outline-none"
+            className="rounded-xl border py-2 px-3 text-xs theme-input cursor-pointer focus:border-sky-500 focus:outline-none"
           >
             <option value="">All Departments</option>
             {departments.map((d) => (
@@ -105,7 +105,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
           <select
             value={filters.countryId || ''}
             onChange={(e) => dispatch(setFilter({ countryId: e.target.value ? Number(e.target.value) : null, page: 1 }))}
-            className="rounded-xl border py-2 px-3 text-xs theme-input focus:border-sky-500 focus:outline-none"
+            className="rounded-xl border py-2 px-3 text-xs theme-input cursor-pointer focus:border-sky-500 focus:outline-none"
           >
             <option value="">All Countries</option>
             {countries.map((c) => (
@@ -119,13 +119,13 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
           <button
             onClick={handleExportCsv}
             disabled={exporting}
-            className="flex items-center gap-2 rounded-xl glass-card px-4 py-2 text-xs font-semibold theme-subtext hover:theme-heading hover:scale-105 transition active:scale-95 disabled:opacity-50 shadow-sm"
+            className="flex items-center gap-2 rounded-xl glass-card px-4 py-2 text-xs font-semibold theme-subtext hover:theme-heading hover:scale-105 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm"
           >
             <Download className="h-4 w-4" /> {exporting ? 'Exporting...' : 'Export CSV'}
           </button>
           <button
             onClick={onOpenCreateModal}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/20 hover:from-blue-500 hover:to-sky-400 hover:scale-105 active:scale-95 transition"
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/20 hover:from-blue-500 hover:to-sky-400 hover:scale-105 active:scale-95 cursor-pointer transition"
           >
             <UserPlus className="h-4 w-4" /> Add Employee
           </button>
@@ -137,15 +137,15 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
         <table className="w-full text-left text-xs">
           <thead className="theme-table-header theme-subtext uppercase font-semibold border-b border-slate-700/20">
             <tr>
-              <th className="py-3.5 px-4 cursor-pointer hover:theme-heading" onClick={() => handleSort('id')}>
+              <th className="py-3.5 px-4 cursor-pointer hover:theme-heading select-none" onClick={() => handleSort('id')}>
                 <div className="flex items-center gap-1">ID <ArrowUpDown className="h-3 w-3" /></div>
               </th>
-              <th className="py-3.5 px-4 cursor-pointer hover:theme-heading" onClick={() => handleSort('first_name')}>
+              <th className="py-3.5 px-4 cursor-pointer hover:theme-heading select-none" onClick={() => handleSort('first_name')}>
                 <div className="flex items-center gap-1">Employee <ArrowUpDown className="h-3 w-3" /></div>
               </th>
               <th className="py-3.5 px-4">Role & Dept</th>
               <th className="py-3.5 px-4">Location</th>
-              <th className="py-3.5 px-4 cursor-pointer hover:theme-heading" onClick={() => handleSort('base_salary')}>
+              <th className="py-3.5 px-4 cursor-pointer hover:theme-heading select-none" onClick={() => handleSort('base_salary')}>
                 <div className="flex items-center gap-1">Base Salary <ArrowUpDown className="h-3 w-3" /></div>
               </th>
               <th className="py-3.5 px-4">Bonus</th>
@@ -196,7 +196,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
                   <td className="py-3.5 px-4 text-right">
                     <button
                       onClick={() => onOpenEditModal(emp)}
-                      className="rounded-lg p-1.5 theme-subtext hover:theme-heading hover:bg-sky-500/10 transition"
+                      className="rounded-lg p-1.5 theme-subtext hover:theme-heading hover:bg-sky-500/10 cursor-pointer transition"
                       title="Edit Salary / Role"
                     >
                       <Edit2 className="h-4 w-4" />
@@ -221,7 +221,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
             <button
               onClick={() => dispatch(setFilter({ page: employees.page - 1 }))}
               disabled={employees.page <= 1}
-              className="flex items-center gap-1 rounded-lg glass-card px-3 py-1.5 disabled:opacity-40 hover:theme-heading theme-subtext transition"
+              className="flex items-center gap-1 rounded-lg glass-card px-3 py-1.5 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:theme-heading theme-subtext transition"
             >
               <ChevronLeft className="h-3.5 w-3.5" /> Previous
             </button>
@@ -231,7 +231,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
             <button
               onClick={() => dispatch(setFilter({ page: employees.page + 1 }))}
               disabled={employees.page >= employees.total_pages}
-              className="flex items-center gap-1 rounded-lg glass-card px-3 py-1.5 disabled:opacity-40 hover:theme-heading theme-subtext transition"
+              className="flex items-center gap-1 rounded-lg glass-card px-3 py-1.5 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:theme-heading theme-subtext transition"
             >
               Next <ChevronRight className="h-3.5 w-3.5" />
             </button>
