@@ -18,7 +18,9 @@ class CustomStructuredFormatter(logging.Formatter):
         event_name = getattr(record, 'event', 'app.api.request')
         pid = record.process
         
-        header = f"{timestamp} | {filename}:{lineno} | {func_name} | {thread_name} | [{levelname}] - event={event_name} | [{filename}:{lineno} in {func_name} | PID:{pid}]"
+        # Non-redundant clean header format:
+        header = f"{timestamp} | {filename}:{lineno} | {func_name} | {thread_name} | PID:{pid} | [{levelname}] - event={event_name} |"
+
         
         message = record.getMessage()
         return f"{header} {message}"
