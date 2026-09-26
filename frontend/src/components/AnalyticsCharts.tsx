@@ -112,7 +112,7 @@ export const AnalyticsCharts: React.FC = () => {
                   tick={{ fontSize: 11 }}
                   tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`}
                 />
-                <Tooltip content={<CustomBarTooltip />} />
+                <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'transparent' }} />
                 <Bar dataKey="total_payroll_usd" radius={[8, 8, 0, 0]}>
                   {deptAnalytics.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
