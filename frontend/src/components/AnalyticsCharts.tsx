@@ -14,7 +14,64 @@ import {
 import { PieChart, Pie, Cell as PieCell } from 'recharts';
 import { PieChart as PieIcon, BarChart3, Scale } from 'lucide-react';
 
-const COLORS = ['#0284c7', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#6366f1', '#14b8a6', '#f97316'];
+const COLORS = [
+  '#38bdf8', // sky-400
+  '#34d399', // emerald-400
+  '#a78bfa', // violet-400
+  '#fb923c', // orange-400
+  '#f472b6', // pink-400
+  '#facc15', // yellow-400
+  '#60a5fa', // blue-400
+  '#4ade80', // green-400
+];
+
+const formatCompactUsd = (num: number): string => {
+  const abs = Math.abs(num);
+  if (abs >= 1_000_000_000) return `$${(num / 1_000_000_000).toFixed(2)} Billion`;
+  if (abs >= 1_000_000) return `$${(num / 1_000_000).toFixed(2)} Million`;
+  return `$${num.toLocaleString()}`;
+};
+
+const CustomPieTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="glass-panel rounded-xl p-3 border border-slate-700 text-xs shadow-xl bg-slate-900/95">
+        <div className="font-bold text-white flex items-center gap-1.5">
+          <span>{data.country_name}</span>
+          <span className="text-[10px] text-sky-400 font-normal">({data.currency_code})</span>
+        </div>
+        <div className="mt-1 text-emerald-400 font-semibold">
+          Payroll: {formatCompactUsd(data.total_payroll_usd)}
+        </div>
+        <div className="text-[11px] text-slate-400 mt-0.5">
+          {data.employee_count?.toLocaleString()} Employees &bull; Avg ${Math.round(data.average_salary_usd).toLocaleString()}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomBarTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="glass-panel rounded-xl p-3 border border-slate-700 text-xs shadow-xl bg-slate-900/95">
+        <div className="font-bold text-white">
+          {data.department_name} Department
+        </div>
+        <div className="mt-1 text-sky-400 font-semibold">
+          Payroll: {formatCompactUsd(data.total_payroll_usd)}
+        </div>
+        <div className="text-[11px] text-slate-400 mt-0.5">
+          {data.employee_count?.toLocaleString()} Employees &bull; Avg ${Math.round(data.average_salary_usd).toLocaleString()}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 export const AnalyticsCharts: React.FC = () => {
   const deptAnalytics = useSelector((state: RootState) => state.salary.departmentAnalytics);
@@ -53,10 +110,7 @@ export const AnalyticsCharts: React.FC = () => {
                 tick={{ fontSize: 11 }}
                 tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`}
               />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#fff' }}
-                formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Total Payroll (USD)']}
-              />
+              <Tooltip content={<CustomBarTooltip />} />
               <Bar dataKey="total_payroll_usd" radius={[8, 8, 0, 0]}>
                 {deptAnalytics.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -94,14 +148,12 @@ export const AnalyticsCharts: React.FC = () => {
                     <PieCell key={`pie-cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '11px' }}
-                  formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Payroll']}
-                />
+                <Tooltip content={<CustomPieTooltip />} />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
+
 
         {/* Gender Pay Ratio */}
         <div className="glass-panel rounded-2xl p-5 border border-slate-800 shadow-xl">
@@ -110,23 +162,36 @@ export const AnalyticsCharts: React.FC = () => {
             <h3 className="text-xs font-semibold text-white">Gender Pay Parity Ratio</h3>
           </div>
           <div className="space-y-2">
-            {genderPayGap.map((item) => (
-              <div key={item.gender} className="flex items-center justify-between text-xs">
-                <span className="text-slate-300 font-medium">{item.gender} ({item.count})</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-white">${item.avg_salary_usd.toLocaleString()}</span>
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
-                      item.pay_ratio_vs_male >= 98
-                        ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                        : 'bg-amber-950 text-amber-400 border border-amber-800'
-                    }`}
-                  >
-                    {item.pay_ratio_vs_male}% ratio
-                  </span>
+            {genderPayGap.map((item) => {
+              const isMale = item.gender === 'Male';
+              const ratio = item.pay_ratio_vs_male;
+              let badgeClass = '';
+              let badgeLabel = '';
+              if (isMale) {
+                badgeClass = 'bg-sky-950 text-sky-400 border border-sky-800';
+                badgeLabel = 'Baseline';
+              } else if (ratio >= 100) {
+                badgeClass = 'bg-emerald-950 text-emerald-400 border border-emerald-800';
+                badgeLabel = `${ratio.toFixed(1)}% ↑ parity`;
+              } else if (ratio >= 98) {
+                badgeClass = 'bg-emerald-950 text-emerald-400 border border-emerald-800';
+                badgeLabel = `${ratio.toFixed(1)}% ratio`;
+              } else {
+                badgeClass = 'bg-amber-950 text-amber-400 border border-amber-800';
+                badgeLabel = `${ratio.toFixed(1)}% ratio`;
+              }
+              return (
+                <div key={item.gender} className="flex items-center justify-between text-xs">
+                  <span className="text-slate-300 font-medium">{item.gender} ({item.count.toLocaleString()})</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-white">${Math.round(item.avg_salary_usd).toLocaleString()}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${badgeClass}`}>
+                      {badgeLabel}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
