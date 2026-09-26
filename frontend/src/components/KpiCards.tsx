@@ -64,16 +64,16 @@ export const KpiCards: React.FC = () => {
         return (
           <div
             key={idx}
-            className={`glass-panel relative overflow-hidden rounded-2xl p-5 border border-slate-800 shadow-xl ${kpi.shadow} transition-all hover:-translate-y-1 hover:border-slate-700`}
+            className={`glass-panel relative overflow-hidden rounded-2xl p-5 shadow-xl ${kpi.shadow} transition-all duration-200 hover:-translate-y-1`}
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-slate-400">{kpi.title}</p>
-                <h3 className="mt-1 text-2xl font-bold tracking-tight text-white">{kpi.value}</h3>
-                <p className="mt-1 text-[11px] font-medium text-slate-400">{kpi.subtitle}</p>
+                <p className="text-xs font-semibold theme-subtext uppercase tracking-wider">{kpi.title}</p>
+                <h3 className="mt-1 text-2xl font-bold tracking-tight theme-heading">{kpi.value}</h3>
+                <p className="mt-1 text-[11px] font-medium theme-subtext">{kpi.subtitle}</p>
               </div>
               <div
-                className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${kpi.color} shadow-md`}
+                className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${kpi.color} shadow-lg`}
               >
                 <Icon className="h-6 w-6 text-white" />
               </div>

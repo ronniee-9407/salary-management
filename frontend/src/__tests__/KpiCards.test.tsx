@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import salaryReducer from '../store/salarySlice';
+import { ThemeProvider } from '../context/ThemeContext';
 import { KpiCards } from '../components/KpiCards';
 
 const createMockStore = (overrides = {}) =>
@@ -55,7 +56,9 @@ describe('KpiCards', () => {
     const store = createMockStore();
     render(
       <Provider store={store}>
-        <KpiCards />
+        <ThemeProvider>
+          <KpiCards />
+        </ThemeProvider>
       </Provider>
     );
 
@@ -73,7 +76,9 @@ describe('KpiCards', () => {
     const store = createMockStore({ loadingAnalytics: true });
     const { container } = render(
       <Provider store={store}>
-        <KpiCards />
+        <ThemeProvider>
+          <KpiCards />
+        </ThemeProvider>
       </Provider>
     );
 
@@ -85,7 +90,9 @@ describe('KpiCards', () => {
     const store = createMockStore();
     render(
       <Provider store={store}>
-        <KpiCards />
+        <ThemeProvider>
+          <KpiCards />
+        </ThemeProvider>
       </Provider>
     );
 
