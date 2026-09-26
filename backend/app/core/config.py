@@ -6,11 +6,9 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     
-    # Default to local SQLite for instant zero-dependency execution, customizable via DATABASE_URL env
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL",
-        f"sqlite:///{os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'salary.db')).replace('\\', '/')}"
-    )
+    # Default to local SQLite database in backend directory
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./salary.db")
+
     
     # Base currency for financial normalization
     BASE_CURRENCY: str = "USD"
