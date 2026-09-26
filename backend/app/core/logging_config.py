@@ -1,4 +1,5 @@
 import logging
+from logging.handlers import RotatingFileHandler
 import sys
 import os
 from datetime import datetime
@@ -14,11 +15,9 @@ class CustomStructuredFormatter(logging.Formatter):
         func_name = getattr(record, 'funcName', 'wrapper')
         thread_name = getattr(record, 'threadName', 'MainThread')
         levelname = record.levelname
-        event_name = getattr(record, 'event', 'app.subprocess.log')
+        event_name = getattr(record, 'event', 'app.api.request')
         pid = record.process
         
-        # Match user's exact production format:
-        # YYYY-MM-DD HH:MM:SS,mmm | file:line | func | Thread | [LEVEL] - event=name | [file:line in func | PID:1234] message
         header = f"{timestamp} | {filename}:{lineno} | {func_name} | {thread_name} | [{levelname}] - event={event_name} | [{filename}:{lineno} in {func_name} | PID:{pid}]"
         
         message = record.getMessage()
@@ -38,12 +37,17 @@ def setup_logging():
         console_handler.setFormatter(formatter)
         logger.addHandler(console_handler)
 
-        # 2. File Handler (Stores logs in backend/logs/app.log)
+        # 2. Rotating File Handler (Max 5MB per file, keeps 5 backup files app.log.1, app.log.2...)
         log_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "logs"))
         os.makedirs(log_dir, exist_ok=True)
         log_file_path = os.path.join(log_dir, "app.log")
 
-        file_handler = logging.FileHandler(log_file_path, encoding="utf-8")
+        file_handler = RotatingFileHandler(
+            log_file_path,
+            maxBytes=5 * 1024 * 1024,  # 5 MB limit per log file
+            backupCount=5,             # Keep up to 5 rotated backup files
+            encoding="utf-8"
+        )
         file_handler.setLevel(logging.INFO)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
@@ -51,4 +55,5 @@ def setup_logging():
     return logger
 
 logger = setup_logging()
+
 
