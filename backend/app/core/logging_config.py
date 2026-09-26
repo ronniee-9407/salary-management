@@ -31,13 +31,7 @@ def setup_logging():
     if not logger.handlers:
         formatter = CustomStructuredFormatter()
 
-        # 1. Console Stream Handler
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setLevel(logging.INFO)
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
-
-        # 2. Rotating File Handler (Max 5MB per file, keeps 5 backup files app.log.1, app.log.2...)
+        # Rotating File Handler ONLY (Stores structured logs in backend/logs/app.log)
         log_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "logs"))
         os.makedirs(log_dir, exist_ok=True)
         log_file_path = os.path.join(log_dir, "app.log")
@@ -53,6 +47,7 @@ def setup_logging():
         logger.addHandler(file_handler)
 
     return logger
+
 
 logger = setup_logging()
 
