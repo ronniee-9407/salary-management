@@ -25,7 +25,11 @@ dist/
 build/
 .DS_Store
 
-# Pytest / Coverage
+# Pytest / Coverage / Logs
 .pytest_cache/
 .coverage
 htmlcov/
+backend/logs/
+logs/
+*.log
+

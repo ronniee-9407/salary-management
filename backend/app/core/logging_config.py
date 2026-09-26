@@ -30,11 +30,25 @@ def setup_logging():
     logger.propagate = False
 
     if not logger.handlers:
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(logging.INFO)
-        handler.setFormatter(CustomStructuredFormatter())
-        logger.addHandler(handler)
+        formatter = CustomStructuredFormatter()
+
+        # 1. Console Stream Handler
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(logging.INFO)
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
+
+        # 2. File Handler (Stores logs in backend/logs/app.log)
+        log_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "logs"))
+        os.makedirs(log_dir, exist_ok=True)
+        log_file_path = os.path.join(log_dir, "app.log")
+
+        file_handler = logging.FileHandler(log_file_path, encoding="utf-8")
+        file_handler.setLevel(logging.INFO)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
 
     return logger
 
 logger = setup_logging()
+
