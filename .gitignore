@@ -10,6 +10,9 @@ __pycache__/
 env/
 venv/
 ENV/
+salary_management/
+backend/salary_management/
+
 
 # Databases & local sqlite
 *.db
