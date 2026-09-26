@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_, and_, asc, desc
+from sqlalchemy import or_, and_, asc, desc, func
 from app.models.models import Employee, Country, Department
 from app.schemas.schemas import EmployeeCreate, EmployeeUpdate, EmployeeOut, CountryOut, DepartmentOut
 from typing import Tuple, List, Optional
@@ -55,10 +55,12 @@ def get_employees(
             or_(
                 Employee.first_name.ilike(search_fmt),
                 Employee.last_name.ilike(search_fmt),
+                func.concat(Employee.first_name, ' ', Employee.last_name).ilike(search_fmt),
                 Employee.email.ilike(search_fmt),
                 Employee.job_title.ilike(search_fmt)
             )
         )
+
 
     if department_id:
         query = query.filter(Employee.department_id == department_id)

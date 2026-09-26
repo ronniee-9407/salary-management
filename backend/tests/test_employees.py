@@ -90,6 +90,12 @@ def test_filter_employee_search():
     data = response.json()
     assert data["total"] == 1
 
+    # Test full name concatenation search (e.g. 'Alice Smith')
+    response_fullname = client.get("/api/v1/employees?search=Alice Smith")
+    assert response_fullname.status_code == 200
+    assert response_fullname.json()["total"] == 1
+
     response_empty = client.get("/api/v1/employees?search=NonExistent")
     assert response_empty.status_code == 200
     assert response_empty.json()["total"] == 0
+
