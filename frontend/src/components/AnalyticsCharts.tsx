@@ -12,7 +12,7 @@ import {
   Cell,
 } from 'recharts';
 import { PieChart, Pie, Cell as PieCell } from 'recharts';
-import { PieChart as PieIcon, BarChart3, Scale } from 'lucide-react';
+import { PieChart as PieIcon, BarChart3, Scale, Trophy } from 'lucide-react';
 
 const COLORS = [
   '#38bdf8', // sky-400
@@ -77,6 +77,7 @@ export const AnalyticsCharts: React.FC = () => {
   const deptAnalytics = useSelector((state: RootState) => state.salary.departmentAnalytics);
   const countryAnalytics = useSelector((state: RootState) => state.salary.countryAnalytics);
   const genderPayGap = useSelector((state: RootState) => state.salary.genderPayGap);
+  const topRoles = useSelector((state: RootState) => state.salary.topRoles);
   const loading = useSelector((state: RootState) => state.salary.loadingAnalytics);
 
   if (loading) {
@@ -89,6 +90,7 @@ export const AnalyticsCharts: React.FC = () => {
   }
 
   return (
+    <>
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
       {/* Department Breakdown */}
@@ -196,5 +198,42 @@ export const AnalyticsCharts: React.FC = () => {
         </div>
       </div>
     </div>
+
+      {/* Top 5 Highest-Paid Roles */}
+      <div className="glass-panel rounded-2xl p-6 border border-slate-800 shadow-xl mt-6">
+        <div className="flex items-center gap-2 mb-5">
+          <Trophy className="h-5 w-5 text-amber-400" />
+          <h3 className="text-sm font-semibold text-white">Top 5 Highest-Paid Roles</h3>
+          <span className="ml-auto text-xs text-slate-400">Average Base Salary (USD)</span>
+        </div>
+        <div className="space-y-3">
+          {topRoles.map((role, idx) => {
+            const maxAvg = topRoles[0]?.avg_salary_usd || 1;
+            const pct = Math.round((role.avg_salary_usd / maxAvg) * 100);
+            const barColors = ['from-amber-500 to-yellow-400', 'from-sky-500 to-cyan-400', 'from-violet-500 to-purple-400', 'from-emerald-500 to-teal-400', 'from-pink-500 to-rose-400'];
+            return (
+              <div key={role.job_title} className="flex items-center gap-3">
+                <span className="text-xs font-bold text-slate-400 w-4">{idx + 1}</span>
+                <div className="flex-1">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs font-semibold text-white">{role.job_title}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] text-slate-400">{role.employee_count.toLocaleString()} employees</span>
+                      <span className="text-xs font-bold text-amber-400">${Math.round(role.avg_salary_usd).toLocaleString()}</span>
+                    </div>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-slate-800">
+                    <div
+                      className={`h-2 rounded-full bg-gradient-to-r ${barColors[idx]} transition-all duration-700`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
   );
 };

@@ -8,7 +8,8 @@ import type {
   GenderPayGap, 
   Country, 
   Department,
-  EmployeeFilterState 
+  EmployeeFilterState,
+  TopRole
 } from '../types';
 
 
@@ -82,4 +83,21 @@ export const updateEmployee = async (id: number, employeeData: Partial<Employee>
 
 export const deleteEmployee = async (id: number): Promise<void> => {
   await api.delete(`/employees/${id}`);
+};
+
+export const fetchTopRoles = async (limit = 5): Promise<TopRole[]> => {
+  const response = await api.get<TopRole[]>('/analytics/top-roles', { params: { limit } });
+  return response.data;
+};
+
+export const exportEmployeesCsv = async (): Promise<void> => {
+  const response = await api.get('/analytics/export-csv', { responseType: 'blob' });
+  const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/csv' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', `acme_salary_export_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
 };

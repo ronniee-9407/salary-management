@@ -93,3 +93,11 @@ export interface EmployeeFilterState {
   sortOrder: 'asc' | 'desc';
   displayCurrency: string; // 'USD' or 'LOCAL'
 }
+
+export interface TopRole {
+  job_title: string;
+  employee_count: number;
+  avg_salary_usd: number;
+  max_salary_usd: number;
+  total_payroll_usd: number;
+}

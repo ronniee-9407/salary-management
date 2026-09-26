@@ -1,9 +1,11 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models.models import Employee, Country, Department
-from app.schemas.schemas import AnalyticsSummary, DepartmentAnalytics, CountryAnalytics, GenderPayGap
+from app.schemas.schemas import AnalyticsSummary, DepartmentAnalytics, CountryAnalytics, GenderPayGap, TopRole
 from typing import List
 import numpy as np
+import csv
+import io
 
 def format_compact_currency(val: float) -> str:
     abs_val = abs(val)
@@ -136,3 +138,73 @@ def get_gender_pay_gap(db: Session) -> List[GenderPayGap]:
         )
         
     return results
+
+
+def get_top_roles(db: Session, limit: int = 5) -> List[TopRole]:
+    """Return the top N job titles by average USD salary."""
+    employees = db.query(Employee).join(Country).all()
+    role_map: dict = {}
+
+    for emp in employees:
+        rate = emp.country.exchange_rate_to_usd if emp.country and emp.country.exchange_rate_to_usd > 0 else 1.0
+        usd_sal = emp.base_salary * rate
+        title = emp.job_title
+        if title not in role_map:
+            role_map[title] = []
+        role_map[title].append(usd_sal)
+
+    results = []
+    for title, salaries in role_map.items():
+        count = len(salaries)
+        avg_sal = float(np.mean(salaries))
+        max_sal = float(np.max(salaries))
+        total = float(np.sum(salaries))
+        results.append(
+            TopRole(
+                job_title=title,
+                employee_count=count,
+                avg_salary_usd=round(avg_sal, 2),
+                max_salary_usd=round(max_sal, 2),
+                total_payroll_usd=round(total, 2),
+            )
+        )
+
+    results.sort(key=lambda x: x.avg_salary_usd, reverse=True)
+    return results[:limit]
+
+
+def get_employees_csv(db: Session) -> str:
+    """Return all employees as a CSV string for export."""
+    employees = db.query(Employee).join(Country).join(Department).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        'ID', 'First Name', 'Last Name', 'Email', 'Gender', 'Job Title',
+        'Department', 'Country', 'Currency', 'Base Salary (Local)',
+        'Bonus (Local)', 'Base Salary (USD)', 'Total Compensation (USD)',
+        'Created At'
+    ])
+
+    for emp in employees:
+        rate = emp.country.exchange_rate_to_usd if emp.country and emp.country.exchange_rate_to_usd > 0 else 1.0
+        salary_usd = round(emp.base_salary * rate, 2)
+        total_usd = round((emp.base_salary + (emp.bonus or 0.0)) * rate, 2)
+        writer.writerow([
+            emp.id,
+            emp.first_name,
+            emp.last_name,
+            emp.email,
+            emp.gender,
+            emp.job_title,
+            emp.department.name,
+            emp.country.name,
+            emp.country.currency_code,
+            round(emp.base_salary, 2),
+            round(emp.bonus or 0.0, 2),
+            salary_usd,
+            total_usd,
+            emp.created_at.strftime('%Y-%m-%d') if emp.created_at else ''
+        ])
+
+    return output.getvalue()

@@ -102,3 +102,10 @@ class GenderPayGap(BaseModel):
     avg_salary_usd: float
     median_salary_usd: float
     pay_ratio_vs_male: float
+
+class TopRole(BaseModel):
+    job_title: str
+    employee_count: int
+    avg_salary_usd: float
+    max_salary_usd: float
+    total_payroll_usd: float

@@ -82,3 +82,23 @@ def test_analytics_pay_gap():
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 2
+
+def test_analytics_top_roles():
+    response = client.get("/api/v1/analytics/top-roles", params={"limit": 5})
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 2  # Only 2 distinct job titles in test data
+    assert data[0]["avg_salary_usd"] >= data[1]["avg_salary_usd"]  # Sorted desc
+    assert "job_title" in data[0]
+    assert "employee_count" in data[0]
+
+def test_analytics_export_csv():
+    response = client.get("/api/v1/analytics/export-csv")
+    assert response.status_code == 200
+    assert "text/csv" in response.headers["content-type"]
+    content = response.text
+    lines = content.strip().split("\n")
+    assert len(lines) == 3  # 1 header + 2 employees
+    assert "First Name" in lines[0]
+    assert "John" in lines[1] or "John" in lines[2]
+

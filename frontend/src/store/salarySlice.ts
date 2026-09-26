@@ -9,7 +9,8 @@ import type {
   GenderPayGap, 
   Country, 
   Department,
-  EmployeeFilterState 
+  EmployeeFilterState,
+  TopRole
 } from '../types';
 
 import * as api from '../services/api';
@@ -21,6 +22,7 @@ interface SalaryState {
   departmentAnalytics: DepartmentAnalytics[];
   countryAnalytics: CountryAnalytics[];
   genderPayGap: GenderPayGap[];
+  topRoles: TopRole[];
   countries: Country[];
   departments: Department[];
   loadingEmployees: boolean;
@@ -50,6 +52,7 @@ const initialState: SalaryState = {
   departmentAnalytics: [],
   countryAnalytics: [],
   genderPayGap: [],
+  topRoles: [],
   countries: [],
   departments: [],
   loadingEmployees: false,
@@ -69,13 +72,14 @@ export const loadEmployees = createAsyncThunk(
 export const loadAnalytics = createAsyncThunk(
   'salary/loadAnalytics',
   async () => {
-    const [summary, deptAnalytics, countryAnalytics, payGap] = await Promise.all([
+    const [summary, deptAnalytics, countryAnalytics, payGap, topRoles] = await Promise.all([
       api.fetchAnalyticsSummary(),
       api.fetchDepartmentAnalytics(),
       api.fetchCountryAnalytics(),
       api.fetchGenderPayGap(),
+      api.fetchTopRoles(),
     ]);
-    return { summary, deptAnalytics, countryAnalytics, payGap };
+    return { summary, deptAnalytics, countryAnalytics, payGap, topRoles };
   }
 );
 
@@ -133,6 +137,7 @@ export const salarySlice = createSlice({
         state.departmentAnalytics = action.payload.deptAnalytics;
         state.countryAnalytics = action.payload.countryAnalytics;
         state.genderPayGap = action.payload.payGap;
+        state.topRoles = action.payload.topRoles;
       })
 
       // Metadata

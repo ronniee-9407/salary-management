@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import { setFilter, loadEmployees } from '../store/salarySlice';
 import type { Employee } from '../types';
+import * as api from '../services/api';
 import {
   Search,
   ChevronLeft,
@@ -11,6 +12,7 @@ import {
   UserPlus,
   Edit2,
   Globe,
+  Download,
 } from 'lucide-react';
 
 
@@ -26,6 +28,18 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
   );
 
   const [searchInput, setSearchInput] = useState(filters.search);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportCsv = async () => {
+    setExporting(true);
+    try {
+      await api.exportEmployeesCsv();
+    } catch (err) {
+      console.error('CSV export failed', err);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   // Debounced search
   useEffect(() => {
@@ -101,13 +115,22 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
           </select>
         </div>
 
-        {/* Action button */}
-        <button
-          onClick={onOpenCreateModal}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-sky-500 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/20 hover:from-brand-500 hover:to-sky-400 transition"
-        >
-          <UserPlus className="h-4 w-4" /> Add Employee
-        </button>
+        {/* Action buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCsv}
+            disabled={exporting}
+            className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition disabled:opacity-50"
+          >
+            <Download className="h-4 w-4" /> {exporting ? 'Exporting...' : 'Export CSV'}
+          </button>
+          <button
+            onClick={onOpenCreateModal}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-sky-500 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/20 hover:from-brand-500 hover:to-sky-400 transition"
+          >
+            <UserPlus className="h-4 w-4" /> Add Employee
+          </button>
+        </div>
       </div>
 
       {/* Employee Data Table */}
