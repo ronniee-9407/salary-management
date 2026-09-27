@@ -32,6 +32,18 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({ isOpen, onClose, e
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Lock background body scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     if (employeeToEdit) {
       setFormData({
@@ -84,67 +96,70 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({ isOpen, onClose, e
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in">
-      <div className="glass-panel w-full max-w-xl rounded-2xl p-6 shadow-2xl animate-in zoom-in-95">
-        <div className="flex items-center justify-between border-b border-slate-700/20 pb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-3 sm:p-4">
+      <div className="glass-panel w-full max-w-xl max-h-[90vh] flex flex-col rounded-2xl p-5 shadow-2xl animate-in zoom-in-95">
+        
+        {/* Modal Header */}
+        <div className="flex items-center justify-between border-b border-slate-700/20 pb-3 shrink-0">
           <div className="flex items-center gap-2">
-            <UserCheck className="h-5 w-5 text-sky-400" />
-            <h2 className="text-base font-bold theme-heading">
+            <UserCheck className="h-4 w-4 text-sky-400" />
+            <h2 className="text-sm font-bold theme-heading">
               {employeeToEdit ? `Edit Employee #${employeeToEdit.id}` : 'Add New Employee'}
             </h2>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1 theme-subtext hover:theme-heading hover:bg-slate-700/20 cursor-pointer">
-            <X className="h-5 w-5" />
+          <button onClick={onClose} className="rounded-lg p-1 theme-subtext hover:theme-heading hover:bg-slate-700/20 cursor-pointer transition">
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {error && (
-          <div className="mt-4 rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-xs text-red-500 font-medium">
+          <div className="mt-2.5 rounded-xl bg-red-500/10 border border-red-500/20 p-2.5 text-xs text-red-500 font-medium shrink-0">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-xs">
-          <div className="grid grid-cols-2 gap-4">
+        {/* Scrollable Form Body */}
+        <form onSubmit={handleSubmit} className="mt-3 flex-1 overflow-y-auto pr-1 space-y-3.5 text-xs">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-medium theme-subtext mb-1">First Name</label>
+              <label className="block font-medium theme-subtext mb-1 text-[11px]">First Name</label>
               <input
                 type="text"
                 required
                 value={formData.first_name}
                 onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                className="w-full rounded-xl border p-2.5 theme-input focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border p-2 theme-input focus:border-sky-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block font-medium theme-subtext mb-1">Last Name</label>
+              <label className="block font-medium theme-subtext mb-1 text-[11px]">Last Name</label>
               <input
                 type="text"
                 required
                 value={formData.last_name}
                 onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                className="w-full rounded-xl border p-2.5 theme-input focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border p-2 theme-input focus:border-sky-500 focus:outline-none"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-medium theme-subtext mb-1">Email Address</label>
+              <label className="block font-medium theme-subtext mb-1 text-[11px]">Email Address</label>
               <input
                 type="email"
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full rounded-xl border p-2.5 theme-input focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border p-2 theme-input focus:border-sky-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block font-medium theme-subtext mb-1">Gender</label>
+              <label className="block font-medium theme-subtext mb-1 text-[11px]">Gender</label>
               <select
                 value={formData.gender}
                 onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
-                className="w-full rounded-xl border p-2.5 theme-input cursor-pointer focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border p-2 theme-input cursor-pointer focus:border-sky-500 focus:outline-none"
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -153,23 +168,23 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({ isOpen, onClose, e
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block font-medium theme-subtext mb-1">Job Title</label>
+              <label className="block font-medium theme-subtext mb-1 text-[11px]">Job Title</label>
               <input
                 type="text"
                 required
                 value={formData.job_title}
                 onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
-                className="w-full rounded-xl border p-2.5 theme-input focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border p-2 theme-input focus:border-sky-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block font-medium theme-subtext mb-1">Department</label>
+              <label className="block font-medium theme-subtext mb-1 text-[11px]">Department</label>
               <select
                 value={formData.department_id}
                 onChange={(e) => setFormData({ ...formData, department_id: Number(e.target.value) })}
-                className="w-full rounded-xl border p-2.5 theme-input cursor-pointer focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border p-2 theme-input cursor-pointer focus:border-sky-500 focus:outline-none"
               >
                 {departments.map((d) => (
                   <option key={d.id} value={d.id}>{d.name}</option>
@@ -177,11 +192,11 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({ isOpen, onClose, e
               </select>
             </div>
             <div>
-              <label className="block font-medium theme-subtext mb-1">Country</label>
+              <label className="block font-medium theme-subtext mb-1 text-[11px]">Country</label>
               <select
                 value={formData.country_id}
                 onChange={(e) => setFormData({ ...formData, country_id: Number(e.target.value) })}
-                className="w-full rounded-xl border p-2.5 theme-input cursor-pointer focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border p-2 theme-input cursor-pointer focus:border-sky-500 focus:outline-none"
               >
                 {countries.map((c) => (
                   <option key={c.id} value={c.id}>{c.name} ({c.currency_code})</option>
@@ -190,45 +205,45 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({ isOpen, onClose, e
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-medium theme-subtext mb-1">Base Salary (Local Currency)</label>
+              <label className="block font-medium theme-subtext mb-1 text-[11px]">Base Salary (Local)</label>
               <input
                 type="number"
                 min="1"
                 required
                 value={formData.base_salary}
                 onChange={(e) => setFormData({ ...formData, base_salary: Number(e.target.value) })}
-                className="w-full rounded-xl border p-2.5 theme-input focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border p-2 theme-input focus:border-sky-500 focus:outline-none font-mono"
               />
             </div>
             <div>
-              <label className="block font-medium theme-subtext mb-1">Annual Bonus (Local Currency)</label>
+              <label className="block font-medium theme-subtext mb-1 text-[11px]">Annual Bonus (Local)</label>
               <input
                 type="number"
                 min="0"
                 required
                 value={formData.bonus}
                 onChange={(e) => setFormData({ ...formData, bonus: Number(e.target.value) })}
-                className="w-full rounded-xl border p-2.5 theme-input focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl border p-2 theme-input focus:border-sky-500 focus:outline-none font-mono"
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-slate-700/20 pt-4">
+          <div className="flex items-center justify-end gap-2.5 border-t border-slate-700/20 pt-3 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl glass-card px-4 py-2 font-semibold theme-subtext hover:theme-heading cursor-pointer"
+              className="rounded-xl glass-card px-4 py-1.5 font-semibold text-xs theme-subtext hover:theme-heading cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-2 font-semibold text-white shadow-lg shadow-sky-500/20 hover:from-blue-500 hover:to-sky-400 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed transition"
+              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 px-4 py-1.5 text-xs font-semibold text-white shadow-lg shadow-sky-500/20 hover:from-blue-500 hover:to-sky-400 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed transition"
             >
-              <Save className="h-4 w-4" /> {saving ? 'Saving...' : 'Save Employee'}
+              <Save className="h-3.5 w-3.5" /> {saving ? 'Saving...' : 'Save Employee'}
             </button>
           </div>
         </form>
