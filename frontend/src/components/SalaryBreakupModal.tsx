@@ -4,7 +4,7 @@ import type { RootState } from '../store';
 import type { Employee } from '../types';
 import * as api from '../services/api';
 import { loadEmployees, loadAnalytics } from '../store/salarySlice';
-import { X, FileText, Save, CheckCircle2, ShieldAlert, Sparkles, Building2, Globe } from 'lucide-react';
+import { X, FileText, Save, CheckCircle2, ShieldAlert, DollarSign, Globe } from 'lucide-react';
 
 interface SalaryBreakupModalProps {
   isOpen: boolean;
@@ -18,8 +18,9 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
   employee,
 }) => {
   const dispatch = useDispatch();
-  const displayCurrency = useSelector((state: RootState) => state.salary.filters.displayCurrency);
+  const globalDisplayCurrency = useSelector((state: RootState) => state.salary.filters.displayCurrency);
 
+  const [modalCurrency, setModalCurrency] = useState<'USD' | 'LOCAL'>(globalDisplayCurrency);
   const [baseSalary, setBaseSalary] = useState<number>(0);
   const [basicPay, setBasicPay] = useState<number>(0);
   const [hra, setHra] = useState<number>(0);
@@ -33,11 +34,21 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
 
   useEffect(() => {
     if (employee) {
-      const base = employee.base_salary;
-      setBaseSalary(base);
-      setBonus(employee.bonus || 0);
+      const mode = globalDisplayCurrency;
+      setModalCurrency(mode);
 
-      // Default breakdown: 50% Basic, 30% HRA, 8% Medical, 12% Special
+      const fxRate = employee.country.exchange_rate_to_usd || 1.0;
+      const base = mode === 'USD' 
+        ? Math.round(employee.base_salary * fxRate)
+        : Math.round(employee.base_salary);
+      const bns = mode === 'USD'
+        ? Math.round((employee.bonus || 0) * fxRate)
+        : Math.round(employee.bonus || 0);
+
+      setBaseSalary(base);
+      setBonus(bns);
+
+      // Breakdown: 50% Basic, 30% HRA, 8% Medical, 12% Special
       const b = Math.round(base * 0.5);
       const h = Math.round(base * 0.3);
       const m = Math.round(base * 0.08);
@@ -50,19 +61,57 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
       setError(null);
       setSuccessMsg(null);
     }
-  }, [employee, isOpen]);
+  }, [employee, isOpen, globalDisplayCurrency]);
 
   if (!isOpen || !employee) return null;
 
-  const symbol = employee.country.currency_symbol;
-  const rate = employee.country.exchange_rate_to_usd;
+  const fxRate = employee.country.exchange_rate_to_usd || 1.0;
+  const localSymbol = employee.country.currency_symbol;
+  const localCode = employee.country.currency_code;
+
+  const activeSymbol = modalCurrency === 'USD' ? '$' : localSymbol;
+  const activeCode = modalCurrency === 'USD' ? 'USD' : localCode;
+
+  // Toggle currency between USD and LOCAL in modal
+  const handleToggleCurrency = (targetMode: 'USD' | 'LOCAL') => {
+    if (targetMode === modalCurrency) return;
+
+    if (targetMode === 'USD') {
+      // Converting current LOCAL state to USD
+      const newBase = Math.round(baseSalary * fxRate);
+      const newBasic = Math.round(basicPay * fxRate);
+      const newHra = Math.round(hra * fxRate);
+      const newMed = Math.round(medicalAllowance * fxRate);
+      const newSpecial = newBase - (newBasic + newHra + newMed);
+      const newBonus = Math.round(bonus * fxRate);
+
+      setBaseSalary(newBase);
+      setBasicPay(newBasic);
+      setHra(newHra);
+      setMedicalAllowance(newMed);
+      setSpecialAllowance(newSpecial);
+      setBonus(newBonus);
+    } else {
+      // Converting current USD state to LOCAL
+      const newBase = Math.round(baseSalary / fxRate);
+      const newBasic = Math.round(basicPay / fxRate);
+      const newHra = Math.round(hra / fxRate);
+      const newMed = Math.round(medicalAllowance / fxRate);
+      const newSpecial = newBase - (newBasic + newHra + newMed);
+      const newBonus = Math.round(bonus / fxRate);
+
+      setBaseSalary(newBase);
+      setBasicPay(newBasic);
+      setHra(newHra);
+      setMedicalAllowance(newMed);
+      setSpecialAllowance(newSpecial);
+      setBonus(newBonus);
+    }
+    setModalCurrency(targetMode);
+  };
 
   const formatCurrency = (amount: number) => {
-    if (displayCurrency === 'LOCAL') {
-      return `${symbol}${Math.round(amount).toLocaleString('en-US')}`;
-    }
-    const usd = amount * rate;
-    return `$${Math.round(usd).toLocaleString('en-US')}`;
+    return `${activeSymbol}${Math.round(amount).toLocaleString('en-US')}`;
   };
 
   // Recalculate Special Allowance whenever Basic, HRA, or Medical changes
@@ -98,7 +147,7 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
   };
 
   const totalAllowancesSum = basicPay + hra + medicalAllowance + specialAllowance;
-  const isBalanced = Math.abs(totalAllowancesSum - baseSalary) < 1;
+  const isBalanced = Math.abs(totalAllowancesSum - baseSalary) < 2;
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,14 +159,18 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
     setSaving(true);
     setError(null);
 
+    // If edited in USD mode, convert back to Local Currency for database storage
+    const saveBaseLocal = modalCurrency === 'USD' ? roundTo(baseSalary / fxRate, 2) : roundTo(baseSalary, 2);
+    const saveBonusLocal = modalCurrency === 'USD' ? roundTo(bonus / fxRate, 2) : roundTo(bonus, 2);
+
     try {
       await api.updateEmployee(employee.id, {
-        base_salary: baseSalary,
-        bonus: bonus,
+        base_salary: saveBaseLocal,
+        bonus: saveBonusLocal,
       });
       dispatch(loadEmployees() as any);
       dispatch(loadAnalytics() as any);
-      setSuccessMsg('Salary breakup updated & saved successfully!');
+      setSuccessMsg('Salary slip breakup saved to database!');
       setTimeout(() => {
         onClose();
       }, 1200);
@@ -126,6 +179,11 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
     } finally {
       setSaving(false);
     }
+  };
+
+  const roundTo = (num: number, decimals: number) => {
+    const factor = Math.pow(10, decimals);
+    return Math.round(num * factor) / factor;
   };
 
   // Percentage calculations
@@ -160,12 +218,41 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 theme-subtext hover:theme-heading hover:bg-slate-700/20 cursor-pointer transition"
-          >
-            <X className="h-5 w-5" />
-          </button>
+
+          <div className="flex items-center gap-3">
+            {/* Modal Currency Toggle */}
+            <div className="flex items-center rounded-lg glass-card p-1">
+              <button
+                type="button"
+                onClick={() => handleToggleCurrency('USD')}
+                className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-md cursor-pointer transition-all ${
+                  modalCurrency === 'USD'
+                    ? 'bg-blue-600 text-white shadow'
+                    : 'theme-subtext hover:theme-heading'
+                }`}
+              >
+                <DollarSign className="h-3 w-3" /> USD
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleCurrency('LOCAL')}
+                className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-md cursor-pointer transition-all ${
+                  modalCurrency === 'LOCAL'
+                    ? 'bg-blue-600 text-white shadow'
+                    : 'theme-subtext hover:theme-heading'
+                }`}
+              >
+                <Globe className="h-3 w-3" /> {localCode}
+              </button>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="rounded-lg p-1.5 theme-subtext hover:theme-heading hover:bg-slate-700/20 cursor-pointer transition"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Feedback Messages */}
@@ -190,26 +277,26 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
           <div className="glass-card rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-sky-500/20 bg-sky-500/5">
             <div>
               <span className="text-xs font-semibold uppercase theme-subtext tracking-wider">
-                Total Base Salary
+                Total Base Salary ({activeCode})
               </span>
               <div className="text-xl font-bold theme-heading mt-0.5">
                 {formatCurrency(baseSalary)}
               </div>
               <p className="text-[11px] theme-subtext mt-0.5">
-                Sum of all individual allowances strictly balances to this total
+                All input fields below are actively in <span className="font-semibold text-sky-500">{activeCode} ({activeSymbol})</span>
               </p>
             </div>
 
-            <div className="w-full sm:w-48">
+            <div className="w-full sm:w-52">
               <label className="block font-medium theme-subtext mb-1">
-                Edit Total Base ({symbol})
+                Edit Total Base ({activeSymbol})
               </label>
               <input
                 type="number"
                 min="1"
                 value={baseSalary}
                 onChange={(e) => handleBaseSalaryChange(Number(e.target.value))}
-                className="w-full rounded-xl border p-2 text-xs theme-input focus:border-sky-500 focus:outline-none font-semibold"
+                className="w-full rounded-xl border p-2 text-xs theme-input focus:border-sky-500 focus:outline-none font-semibold font-mono"
               />
             </div>
           </div>
@@ -241,7 +328,7 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
           {/* Allowance Breakdown Form Inputs */}
           <div className="space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-wider theme-heading border-b border-slate-700/20 pb-1">
-              Allowance Breakdown Components
+              Allowance Breakdown Components ({activeCode})
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -250,7 +337,7 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
               <div className="glass-card p-3 rounded-xl">
                 <div className="flex justify-between items-center mb-1">
                   <label className="font-semibold theme-heading flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-blue-500" /> Basic Salary (50%)
+                    <span className="h-2 w-2 rounded-full bg-blue-500" /> Basic Salary ({activeSymbol})
                   </label>
                   <span className="text-xs font-mono font-bold text-blue-500">
                     {formatCurrency(basicPay)}
@@ -261,7 +348,7 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
                   min="0"
                   value={basicPay}
                   onChange={(e) => handleBasicChange(Number(e.target.value))}
-                  className="w-full rounded-xl border p-2 theme-input focus:border-sky-500 focus:outline-none"
+                  className="w-full rounded-xl border p-2 theme-input focus:border-sky-500 focus:outline-none font-mono"
                 />
               </div>
 
@@ -269,7 +356,7 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
               <div className="glass-card p-3 rounded-xl">
                 <div className="flex justify-between items-center mb-1">
                   <label className="font-semibold theme-heading flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" /> HRA (House Rent) (30%)
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" /> HRA (House Rent) ({activeSymbol})
                   </label>
                   <span className="text-xs font-mono font-bold text-emerald-500">
                     {formatCurrency(hra)}
@@ -280,7 +367,7 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
                   min="0"
                   value={hra}
                   onChange={(e) => handleHraChange(Number(e.target.value))}
-                  className="w-full rounded-xl border p-2 theme-input focus:border-sky-500 focus:outline-none"
+                  className="w-full rounded-xl border p-2 theme-input focus:border-sky-500 focus:outline-none font-mono"
                 />
               </div>
 
@@ -288,7 +375,7 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
               <div className="glass-card p-3 rounded-xl">
                 <div className="flex justify-between items-center mb-1">
                   <label className="font-semibold theme-heading flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-amber-500" /> Medical & Transport (8%)
+                    <span className="h-2 w-2 rounded-full bg-amber-500" /> Medical & Transport ({activeSymbol})
                   </label>
                   <span className="text-xs font-mono font-bold text-amber-500">
                     {formatCurrency(medicalAllowance)}
@@ -299,7 +386,7 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
                   min="0"
                   value={medicalAllowance}
                   onChange={(e) => handleMedicalChange(Number(e.target.value))}
-                  className="w-full rounded-xl border p-2 theme-input focus:border-sky-500 focus:outline-none"
+                  className="w-full rounded-xl border p-2 theme-input focus:border-sky-500 focus:outline-none font-mono"
                 />
               </div>
 
@@ -320,7 +407,7 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
                   className="w-full rounded-xl border p-2 theme-input bg-slate-800/40 text-slate-400 font-mono focus:outline-none cursor-not-allowed"
                 />
                 <p className="text-[10px] theme-subtext mt-1">
-                  Auto-calculated to balance total base salary
+                  Auto-balances to equal total base salary
                 </p>
               </div>
 
@@ -331,20 +418,20 @@ export const SalaryBreakupModal: React.FC<SalaryBreakupModalProps> = ({
           <div className="glass-card p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-700/20">
             <div>
               <label className="block font-medium theme-subtext mb-1">
-                Annual Performance Bonus ({symbol})
+                Annual Performance Bonus ({activeSymbol})
               </label>
               <input
                 type="number"
                 min="0"
                 value={bonus}
                 onChange={(e) => setBonus(Number(e.target.value))}
-                className="rounded-xl border p-2 text-xs theme-input focus:border-sky-500 focus:outline-none w-44 font-semibold"
+                className="rounded-xl border p-2 text-xs theme-input focus:border-sky-500 focus:outline-none w-48 font-semibold font-mono"
               />
             </div>
 
             <div className="text-right">
               <span className="text-xs theme-subtext font-medium block">
-                Total Annual Compensation (Base + Bonus)
+                Total Annual Compensation ({activeCode})
               </span>
               <span className="text-lg font-bold text-emerald-500 font-mono">
                 {formatCurrency(baseSalary + bonus)}
