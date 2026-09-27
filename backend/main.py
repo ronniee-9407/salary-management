@@ -5,8 +5,16 @@ from app.core.middleware import RequestLoggingMiddleware
 from app.api.v1.api import api_router
 from app.db.database import engine, Base
 
+from sqlalchemy import text
+
 # Ensure tables are created on startup
 Base.metadata.create_all(bind=engine)
+with engine.connect() as conn:
+    try:
+        conn.execute(text("ALTER TABLE employees ADD COLUMN employee_id VARCHAR(50)"))
+        conn.commit()
+    except Exception:
+        pass
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

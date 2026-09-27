@@ -9,7 +9,7 @@ const formatCompactUsd = (num: number): string => {
   const abs = Math.abs(num);
   if (abs >= 1_000_000_000) return `$${(num / 1_000_000_000).toFixed(2)} Billion`;
   if (abs >= 1_000_000) return `$${(num / 1_000_000).toFixed(2)} Million`;
-  return `$${num.toLocaleString()}`;
+  return `$${num.toLocaleString('en-US')}`;
 };
 
 describe('formatCompactUsd', () => {

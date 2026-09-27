@@ -24,6 +24,7 @@ class DepartmentOut(DepartmentBase):
         from_attributes = True
 
 class EmployeeBase(BaseModel):
+    employee_id: Optional[str] = None
     first_name: str
     last_name: str
     email: EmailStr
@@ -38,6 +39,7 @@ class EmployeeCreate(EmployeeBase):
     pass
 
 class EmployeeUpdate(BaseModel):
+    employee_id: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -50,6 +52,7 @@ class EmployeeUpdate(BaseModel):
 
 class EmployeeOut(EmployeeBase):
     id: int
+    employee_id: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     country: CountryOut

@@ -15,6 +15,7 @@ export interface Department {
 
 export interface Employee {
   id: number;
+  employee_id?: string;
   first_name: string;
   last_name: string;
   email: string;

@@ -137,7 +137,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
         <table className="w-full text-left text-xs">
           <thead className="theme-table-header theme-subtext uppercase font-semibold border-b border-slate-700/20">
             <tr>
-              <th className="py-3.5 px-4 cursor-pointer hover:theme-heading select-none" onClick={() => handleSort('id')}>
+              <th className="py-3.5 px-4 cursor-pointer hover:theme-heading select-none" onClick={() => handleSort('employee_id')}>
                 <div className="flex items-center gap-1">Emp ID <ArrowUpDown className="h-3 w-3" /></div>
               </th>
               <th className="py-3.5 px-4 cursor-pointer hover:theme-heading select-none" onClick={() => handleSort('first_name')}>
@@ -169,7 +169,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
             ) : (
               employees?.items.map((emp) => (
                 <tr key={emp.id} className="theme-table-row">
-                  <td className="py-3.5 px-4 font-mono theme-subtext font-semibold">#{emp.id}</td>
+                  <td className="py-3.5 px-4 font-mono text-sky-500 font-semibold">{emp.employee_id || `ACM${emp.id.toString().padStart(5, '0')}`}</td>
                   <td className="py-3.5 px-4">
                     <div className="font-semibold theme-heading">{emp.first_name} {emp.last_name}</div>
                     <div className="text-[11px] theme-subtext">{emp.email}</div>

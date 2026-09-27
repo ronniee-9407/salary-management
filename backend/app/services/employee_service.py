@@ -9,9 +9,11 @@ def enrich_employee_out(emp: Employee) -> EmployeeOut:
     rate = emp.country.exchange_rate_to_usd if emp.country and emp.country.exchange_rate_to_usd > 0 else 1.0
     salary_usd = round(emp.base_salary * rate, 2)
     total_usd = round((emp.base_salary + (emp.bonus or 0.0)) * rate, 2)
+    emp_code = emp.employee_id or f"ACM{emp.id:05d}"
     
     return EmployeeOut(
         id=emp.id,
+        employee_id=emp_code,
         first_name=emp.first_name,
         last_name=emp.last_name,
         email=emp.email,
@@ -53,6 +55,7 @@ def get_employees(
         search_fmt = f"%{search.strip()}%"
         query = query.filter(
             or_(
+                Employee.employee_id.ilike(search_fmt),
                 Employee.first_name.ilike(search_fmt),
                 Employee.last_name.ilike(search_fmt),
                 func.concat(Employee.first_name, ' ', Employee.last_name).ilike(search_fmt),
@@ -107,10 +110,15 @@ def get_employee_by_id(db: Session, employee_id: int) -> Optional[EmployeeOut]:
     return enrich_employee_out(emp)
 
 def create_employee(db: Session, emp_data: EmployeeCreate) -> EmployeeOut:
-    db_emp = Employee(**emp_data.model_dump())
+    data = emp_data.model_dump()
+    db_emp = Employee(**data)
     db.add(db_emp)
     db.commit()
     db.refresh(db_emp)
+    if not db_emp.employee_id:
+        db_emp.employee_id = f"ACM{db_emp.id:05d}"
+        db.commit()
+        db.refresh(db_emp)
     return get_employee_by_id(db, db_emp.id)
 
 def update_employee(db: Session, employee_id: int, emp_data: EmployeeUpdate) -> Optional[EmployeeOut]:

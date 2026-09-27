@@ -180,7 +180,7 @@ def get_employees_csv(db: Session) -> str:
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow([
-        'ID', 'First Name', 'Last Name', 'Email', 'Gender', 'Job Title',
+        'ID', 'Employee ID', 'First Name', 'Last Name', 'Email', 'Gender', 'Job Title',
         'Department', 'Country', 'Currency', 'Base Salary (Local)',
         'Bonus (Local)', 'Base Salary (USD)', 'Total Compensation (USD)',
         'Created At'
@@ -190,8 +190,10 @@ def get_employees_csv(db: Session) -> str:
         rate = emp.country.exchange_rate_to_usd if emp.country and emp.country.exchange_rate_to_usd > 0 else 1.0
         salary_usd = round(emp.base_salary * rate, 2)
         total_usd = round((emp.base_salary + (emp.bonus or 0.0)) * rate, 2)
+        emp_code = emp.employee_id or f"ACM{emp.id:05d}"
         writer.writerow([
             emp.id,
+            emp_code,
             emp.first_name,
             emp.last_name,
             emp.email,

@@ -59,6 +59,16 @@ def seed_database(num_employees: int = 10000):
     print("[INFO] Initializing database schema...")
     Base.metadata.create_all(bind=engine)
     
+    # Check if employee_id column exists in employees table, if not add it
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE employees ADD COLUMN employee_id VARCHAR(50)"))
+            conn.commit()
+            print("[MIGRATION] Added employee_id column to employees table.")
+        except Exception:
+            pass  # Column already exists
+    
     db = SessionLocal()
     try:
         # 1. Seed Countries
@@ -86,7 +96,14 @@ def seed_database(num_employees: int = 10000):
         # Check existing employees count
         existing_emp_count = db.query(Employee).count()
         if existing_emp_count >= num_employees:
-            print(f"[INFO] Database already has {existing_emp_count} employees. Skipping seed.")
+            print(f"[INFO] Database already has {existing_emp_count} employees. Backfilling employee_id codes if needed...")
+            unassigned = db.query(Employee).filter(Employee.employee_id.is_(None)).all()
+            if unassigned:
+                print(f"[UPDATE] Backfilling employee_id for {len(unassigned)} records...")
+                for emp in unassigned:
+                    emp.employee_id = f"ACM{emp.id:05d}"
+                db.commit()
+                print("[SUCCESS] Backfilled all employee_id codes.")
             return
 
         needed = num_employees - existing_emp_count
@@ -126,6 +143,7 @@ def seed_database(num_employees: int = 10000):
             bonus_local = round(base_local * random.uniform(0.05, 0.25), 2) if random.random() > 0.3 else 0.0
 
             emp = Employee(
+                employee_id=f"ACM{i:05d}",
                 first_name=first_name,
                 last_name=last_name,
                 email=email,

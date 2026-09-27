@@ -30,6 +30,7 @@ class Employee(Base):
     __tablename__ = "employees"
 
     id = Column(Integer, primary_key=True, index=True)
+    employee_id = Column(String(50), nullable=True, unique=True, index=True)
     first_name = Column(String(100), nullable=False, index=True)
     last_name = Column(String(100), nullable=False, index=True)
     email = Column(String(150), nullable=False, unique=True, index=True)
