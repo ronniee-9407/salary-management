@@ -35,6 +35,7 @@ Per the evaluation guidelines, engineering decision documents are located in `do
 1. [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md) — 1-Page Product Framing, Persona, Goals, Scope, & Deliberate Omissions with Rationale.
 2. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — ER Schema Diagram, Compound Index Strategy for 10k rows, & API Blueprints.
 3. [`docs/AI_PROMPTS.md`](docs/AI_PROMPTS.md) — Documented AI prompting strategies, pair programming workflow, and quality control.
+4. [`docs/DEPLOYMENT_AWS_EC2.md`](docs/DEPLOYMENT_AWS_EC2.md) — AWS EC2 Ubuntu Deployment Guide with Nginx, Systemd, Uvicorn, and automated `deploy/ec2_setup.sh`.
 
 ---
 
