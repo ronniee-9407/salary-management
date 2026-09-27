@@ -8,12 +8,16 @@ import { KpiCards } from './components/KpiCards';
 import { AnalyticsCharts } from './components/AnalyticsCharts';
 import { EmployeeTable } from './components/EmployeeTable';
 import { EmployeeModal } from './components/EmployeeModal';
+import { SalaryBreakupModal } from './components/SalaryBreakupModal';
 import type { Employee } from './types';
 
 const MainDashboard: React.FC = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [employeeToEdit, setEmployeeToEdit] = useState<Employee | null>(null);
+
+  const [isBreakupModalOpen, setIsBreakupModalOpen] = useState(false);
+  const [selectedBreakupEmployee, setSelectedBreakupEmployee] = useState<Employee | null>(null);
 
   useEffect(() => {
     dispatch(loadMetadata() as any);
@@ -28,6 +32,11 @@ const MainDashboard: React.FC = () => {
   const handleOpenEditModal = (emp: Employee) => {
     setEmployeeToEdit(emp);
     setIsModalOpen(true);
+  };
+
+  const handleOpenBreakupModal = (emp: Employee) => {
+    setSelectedBreakupEmployee(emp);
+    setIsBreakupModalOpen(true);
   };
 
   return (
@@ -50,12 +59,13 @@ const MainDashboard: React.FC = () => {
           <div className="mb-3 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold theme-heading tracking-tight">Employee Compensation Records</h2>
-              <p className="text-xs theme-subtext">Search and filter across 10,000 global employee salary profiles</p>
+              <p className="text-xs theme-subtext">Search and filter across 10,000 global employee salary profiles &bull; Click any row to view & adjust Salary Slip Breakdown</p>
             </div>
           </div>
           <EmployeeTable
             onOpenCreateModal={handleOpenCreateModal}
             onOpenEditModal={handleOpenEditModal}
+            onOpenBreakupModal={handleOpenBreakupModal}
           />
         </section>
       </main>
@@ -65,11 +75,18 @@ const MainDashboard: React.FC = () => {
         ACME Corp Employee Salary Management System &bull; Evaluated for Technical Assessment &bull; Powered by FastAPI & React
       </footer>
 
-      {/* Employee Modal */}
+      {/* Employee Edit / Create Modal */}
       <EmployeeModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         employeeToEdit={employeeToEdit}
+      />
+
+      {/* Salary Slip Breakup Modal */}
+      <SalaryBreakupModal
+        isOpen={isBreakupModalOpen}
+        onClose={() => setIsBreakupModalOpen(false)}
+        employee={selectedBreakupEmployee}
       />
     </div>
   );

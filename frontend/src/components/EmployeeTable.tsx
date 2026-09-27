@@ -18,9 +18,10 @@ import {
 interface EmployeeTableProps {
   onOpenCreateModal: () => void;
   onOpenEditModal: (emp: Employee) => void;
+  onOpenBreakupModal: (emp: Employee) => void;
 }
 
-export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal, onOpenEditModal }) => {
+export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal, onOpenEditModal, onOpenBreakupModal }) => {
   const dispatch = useDispatch();
   const { filters, employees, countries, departments, loadingEmployees } = useSelector(
     (state: RootState) => state.salary
@@ -168,7 +169,12 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
               </tr>
             ) : (
               employees?.items.map((emp) => (
-                <tr key={emp.id} className="theme-table-row">
+                <tr
+                  key={emp.id}
+                  onClick={() => onOpenBreakupModal(emp)}
+                  className="theme-table-row cursor-pointer"
+                  title="Click row to view & adjust Salary Slip Breakdown"
+                >
                   <td className="py-3.5 px-4 font-mono text-sky-500 font-semibold">{emp.employee_id || `ACM${emp.id.toString().padStart(5, '0')}`}</td>
                   <td className="py-3.5 px-4">
                     <div className="font-semibold theme-heading">{emp.first_name} {emp.last_name}</div>
@@ -195,7 +201,10 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({ onOpenCreateModal,
                   </td>
                   <td className="py-3.5 px-4 text-right">
                     <button
-                      onClick={() => onOpenEditModal(emp)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenEditModal(emp);
+                      }}
                       className="rounded-lg p-1.5 theme-subtext hover:theme-heading hover:bg-sky-500/10 cursor-pointer transition"
                       title="Edit Salary / Role"
                     >
